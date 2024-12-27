@@ -7,20 +7,20 @@ var builder = Host.CreateApplicationBuilder();
 // Add in if embedding generator is needed
 // builder.AddOllamaSharpEmbeddingGenerator("chat");
 
-builder.AddKeyedOllamaSharpChatClient("chat", s =>
-{
-    s.Endpoint = new Uri("http://localhost:2200");
-    s.SelectedModel = "phi3.5";
-});
+// TODO: Replace Aspire package with Microsoft.Extensions.AI package
+//       https://devblogs.microsoft.com/dotnet/introducing-microsoft-extensions-ai-preview/
 
-builder.Services.AddChatClient(sp => sp.GetRequiredKeyedService<IChatClient>("chat"))
+var client = new OllamaChatClient(new Uri("http://localhost:2200"), "phi3.5");
+
+builder.Services.AddChatClient(client)
+    .UseLogging()
     .UseFunctionInvocation()
     .UseOpenTelemetry(configure: t => t.EnableSensitiveData = true)
     .UseLogging();
 
 var app = builder.Build();
 
-var chatClient = app.Services.GetRequiredKeyedService<IChatClient>("chat");
+var chatClient = app.Services.GetRequiredService<IChatClient>();
 
 // Add messages for memory
 var messages = new List<ChatMessage>();
