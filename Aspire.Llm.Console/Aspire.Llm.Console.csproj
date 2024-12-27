@@ -9,7 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Cocona" Version="2.2.0" />
+    <PackageReference Include="CommunityToolkit.Aspire.OllamaSharp" Version="9.1.0" />
+    <PackageReference Include="Microsoft.Extensions.AI" Version="9.0.1-preview.1.24570.5" />
   </ItemGroup>
 
 </Project>
