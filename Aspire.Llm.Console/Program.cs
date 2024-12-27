@@ -18,13 +18,6 @@ builder.Services.AddChatClient(sp => sp.GetRequiredKeyedService<IChatClient>("ch
     .UseOpenTelemetry(configure: t => t.EnableSensitiveData = true)
     .UseLogging();
 
-    // Use the OllamaSharp client
-    // .Use());
-
-
-// builder.Services.AddChatClient( )
-
-
 var app = builder.Build();
 
 var chatClient = app.Services.GetRequiredKeyedService<IChatClient>("chat");
@@ -33,26 +26,25 @@ var chatClient = app.Services.GetRequiredKeyedService<IChatClient>("chat");
 var messages = new List<ChatMessage>();
 
 string input;
-do
+
+while (true)
 {
     Console.Write("Query: ");
     input = Console.ReadLine();
-    if (!string.IsNullOrEmpty(input))
-    {
-        messages.Add(new ChatMessage { Text = input });
-        var response = await chatClient.CompleteAsync(messages);
-        messages.AddRange(response.Choices);
-        Console.WriteLine("Result: " + response.Message);
-    }
-} while (!string.IsNullOrEmpty(input));
+    if (string.IsNullOrEmpty(input))
+        break;
+    messages.Add(new ChatMessage { Text = input });
+    // var response = await chatClient.CompleteAsync(messages);
+
+    // Stream response
+    var stream = chatClient.CompleteStreamingAsync(messages);
+    await foreach (var chunk in stream)
+        Console.Write(chunk.Text);
+
+    var completion = await stream.ToChatCompletionAsync();
+    messages.AddRange(completion.Choices);
+    Console.WriteLine();
+    // Console.WriteLine("Result: " + response.Message);
+}
 
 Console.WriteLine("Exiting...");
-
-// app.Run();
-
-// app.AddCommand((string name, int age) =>
-// {
-//     Console.WriteLine("Hello, World, name: {0}, age: {1}", name, age);
-// });
-
-// app.AddCommands<MyCommand>();
